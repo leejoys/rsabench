@@ -1,4 +1,4 @@
-package main
+package cryptoBench
 
 import (
 	"crypto"
@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func main() {
+func rsaMain() {
 	senderPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		log.Fatal(err)

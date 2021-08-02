@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/crypto/ecies"
@@ -21,8 +22,8 @@ func ECCDecrypt(ct []byte, prk ecies.PrivateKey) ([]byte, error) {
 	pt, err := prk.Decrypt(ct, nil, nil)
 	return pt, err
 }
-func getKey() (*ecdsa.PrivateKey, error) {
-	prk, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+func getKey(ell elliptic.Curve) (*ecdsa.PrivateKey, error) {
+	prk, err := ecdsa.GenerateKey(ell, rand.Reader)
 	if err != nil {
 		return prk, err
 	}
@@ -51,13 +52,13 @@ func calculateHashcode(data string) string {
 				pass = true
 			}
 		}
-		if pass == true {
+		if pass {
 			return str
 		}
 	}
 }
 
-func main() {
+func EciesMain() {
 	var mt = "20181111"
 	var pn = "18811881188"
 	var ln = "001"
@@ -68,7 +69,35 @@ func main() {
 	fmt.Println("string:", data)
 	fmt.Println("sha256 encrypted:", hdata)
 	bdata := []byte(hdata)
-	prk, err := getKey()
+	prk, err := getKey(elliptic.P256())
+	if err != nil {
+		log.Fatal(err)
+	}
+	prk2 := ecies.ImportECDSA(prk)
+	puk2 := prk2.PublicKey
+	endata, err := ECCEncrypt([]byte(bdata), puk2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("ecc public key encrypted:", hex.EncodeToString(endata))
+	dedata, err := ECCDecrypt(endata, *prk2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Private Key Decryption:", string(dedata))
+}
+
+func EciesTest() {
+
+	data := "2018111118811881188001importantmeeting216"
+	hdata := calculateHashcode(data)
+	fmt.Println("string:", data)
+	fmt.Println("sha256 encrypted:", hdata)
+	bdata := []byte(hdata)
+	prk, err := getKey(elliptic.P256())
+	if err != nil {
+		log.Fatal(err)
+	}
 	prk2 := ecies.ImportECDSA(prk)
 	puk2 := prk2.PublicKey
 	endata, err := ECCEncrypt([]byte(bdata), puk2)

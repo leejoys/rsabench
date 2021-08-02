@@ -8,12 +8,11 @@ import (
 	"fmt"
 	"log"
 	mrand "math/rand"
-	"os"
 	"strings"
 	"time"
 )
 
-func rsaMain() {
+func RsaMain() {
 	senderPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		log.Fatal(err)
@@ -42,8 +41,7 @@ func rsaMain() {
 	ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, receiverPublicKey, message, label)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	fmt.Printf("OAEP encrypted [%s] to \n[%x]\n", string(message), ciphertext)
@@ -59,8 +57,7 @@ func rsaMain() {
 	signature, err := rsa.SignPSS(rand.Reader, senderPrivateKey, newhash, hashed, &opts)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	fmt.Printf("PSS Signature : %x\n", signature)
@@ -68,8 +65,7 @@ func rsaMain() {
 	plainText, err := rsa.DecryptOAEP(hash, rand.Reader, receiverPrivateKey, ciphertext, label)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	fmt.Printf("OAEP decrypted [%x] to \n[%s]\n", ciphertext, plainText)
@@ -77,8 +73,7 @@ func rsaMain() {
 	err = rsa.VerifyPSS(senderPublicKey, newhash, hashed, signature, &opts)
 
 	if err != nil {
-		fmt.Println("Who are U? Verify Signature failed")
-		os.Exit(1)
+		log.Fatal("Who are U? Verify Signature failed")
 	} else {
 		fmt.Println("Verify Signature successful")
 	}

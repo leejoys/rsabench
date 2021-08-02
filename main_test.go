@@ -2,10 +2,14 @@ package cryptoBench
 
 import (
 	"crypto"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
+	"encoding/hex"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/crypto/ecies"
 )
 
 var result []byte
@@ -52,7 +56,6 @@ func RSA(key int, message []byte, b *testing.B) {
 	newhash := crypto.SHA256
 	pssh := newhash.New()
 
-	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		b.StartTimer()
@@ -105,7 +108,6 @@ func RSAEncrypt(key int, message []byte, b *testing.B) {
 	newhash := crypto.SHA256
 	pssh := newhash.New()
 
-	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		b.StartTimer()
@@ -150,7 +152,6 @@ func RSADecrypt(key int, message []byte, b *testing.B) {
 	newhash := crypto.SHA256
 	pssh := newhash.New()
 
-	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 
@@ -180,42 +181,42 @@ func RSADecrypt(key int, message []byte, b *testing.B) {
 	}
 }
 
-// func Benchmark_ECIES256(b *testing.B) { ECIESCurveN(elliptic.P256(), b) }
+func Benchmark_ECIES256(b *testing.B) { ECIESCurveN(elliptic.P256(), b) }
 
-// func Benchmark_ECIES521(b *testing.B) { ECIESCurveN(elliptic.P521(), b) }
+func Benchmark_ECIES521(b *testing.B) { ECIESCurveN(elliptic.P521(), b) }
 
-// func ECIESCurveN(ell elliptic.Curve, b *testing.B) {
-// 	prk, err := getKey(ell)
-// 	if err != nil {
-// 		b.Fatal(err)
-// 	}
-// 	prk2 := ecies.ImportECDSA(prk)
-// 	puk2 := prk2.PublicKey
+func ECIESCurveN(ell elliptic.Curve, b *testing.B) {
+	prk, err := getKey(ell)
+	if err != nil {
+		b.Fatal(err)
+	}
+	prk2 := ecies.ImportECDSA(prk)
+	puk2 := prk2.PublicKey
 
-// 	NLongString := func(n int, b *testing.B) {
-// 		b.StopTimer()
-// 		for i := 0; i < b.N; i++ {
-// 			bdata := []byte(generateString(n))
-// 			//bdata := []byte(calculateHashcode(data))
-// 			b.ReportAllocs()
-// 			b.StartTimer()
-// 			endata, err := ECCEncrypt([]byte(bdata), puk2)
-// 			if err != nil {
-// 				b.Fatal(err)
-// 			}
+	NLongString := func(n int, b *testing.B) {
+		b.StopTimer()
+		for i := 0; i < b.N; i++ {
+			bdata := []byte(generateString(n))
+			//bdata := []byte(calculateHashcode(data))
+			b.ReportAllocs()
+			b.StartTimer()
+			endata, err := ECCEncrypt([]byte(bdata), puk2)
+			if err != nil {
+				b.Fatal(err)
+			}
 
-// 			dedata, err := ECCDecrypt(endata, *prk2)
-// 			if err != nil {
-// 				b.Fatal(err)
-// 			}
-// 			b.StopTimer()
-// 			result = []byte(hex.EncodeToString(endata))
-// 			result = dedata
-// 		}
-// 	}
-// 	b.Run("string47", func(b *testing.B) { NLongString(47, b) })
+			dedata, err := ECCDecrypt(endata, *prk2)
+			if err != nil {
+				b.Fatal(err)
+			}
+			b.StopTimer()
+			result = []byte(hex.EncodeToString(endata))
+			result = dedata
+		}
+	}
+	b.Run("string47", func(b *testing.B) { NLongString(47, b) })
 
-// 	b.Run("string94", func(b *testing.B) { NLongString(94, b) })
+	b.Run("string94", func(b *testing.B) { NLongString(94, b) })
 
-// 	b.Run("string188", func(b *testing.B) { NLongString(188, b) })
-// }
+	b.Run("string188", func(b *testing.B) { NLongString(188, b) })
+}

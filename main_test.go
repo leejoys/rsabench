@@ -8,7 +8,11 @@ import (
 	"testing"
 )
 
-func Benchmark_RSA(b *testing.B) {
+func Benchmark_RSA2048(b *testing.B) { RSANkeyLong(2048, b) }
+
+func Benchmark_RSA4096(b *testing.B) { RSANkeyLong(4096, b) }
+
+func RSANkeyLong(n int, b *testing.B) {
 
 	senderPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
@@ -30,10 +34,10 @@ func Benchmark_RSA(b *testing.B) {
 	newhash := crypto.SHA256
 	pssh := newhash.New()
 
-	b.Run("2048string47", func(b *testing.B) {
+	NLongString := func(n int, b *testing.B) {
 		b.StopTimer()
 		for i := 0; i < b.N; i++ {
-			message := []byte(generateString(47))
+			message := []byte(generateString(n))
 			b.ReportAllocs()
 			b.StartTimer()
 
@@ -61,72 +65,12 @@ func Benchmark_RSA(b *testing.B) {
 			b.StopTimer()
 			pssh.Write(message) //_
 		}
-	})
+	}
 
-	b.Run("2048string94", func(b *testing.B) {
-		b.StopTimer()
-		for i := 0; i < b.N; i++ {
-			message := []byte(generateString(94))
-			b.ReportAllocs()
-			b.StartTimer()
+	b.Run("string47", func(b *testing.B) { NLongString(47, b) })
 
-			ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, receiverPublicKey, message, label)
-			if err != nil {
-				b.Fatal(err)
-			}
+	b.Run("string94", func(b *testing.B) { NLongString(94, b) })
 
-			pssh.Write(message)
-			hashed := pssh.Sum(nil)
-			signature, err := rsa.SignPSS(rand.Reader, senderPrivateKey, newhash, hashed, &opts)
-			if err != nil {
-				b.Fatal(err)
-			}
-
-			message, err = rsa.DecryptOAEP(hash, rand.Reader, receiverPrivateKey, ciphertext, label)
-			if err != nil {
-				b.Fatal(err)
-			}
-
-			err = rsa.VerifyPSS(senderPublicKey, newhash, hashed, signature, &opts)
-			if err != nil {
-				b.Fatal(err)
-			}
-			b.StopTimer()
-			pssh.Write(message) //_
-		}
-	})
-
-	b.Run("2048string188", func(b *testing.B) {
-		b.StopTimer()
-		for i := 0; i < b.N; i++ {
-			message := []byte(generateString(188))
-			b.ReportAllocs()
-			b.StartTimer()
-
-			ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, receiverPublicKey, message, label)
-			if err != nil {
-				b.Fatal(err)
-			}
-
-			pssh.Write(message)
-			hashed := pssh.Sum(nil)
-			signature, err := rsa.SignPSS(rand.Reader, senderPrivateKey, newhash, hashed, &opts)
-			if err != nil {
-				b.Fatal(err)
-			}
-
-			message, err = rsa.DecryptOAEP(hash, rand.Reader, receiverPrivateKey, ciphertext, label)
-			if err != nil {
-				b.Fatal(err)
-			}
-
-			err = rsa.VerifyPSS(senderPublicKey, newhash, hashed, signature, &opts)
-			if err != nil {
-				b.Fatal(err)
-			}
-			b.StopTimer()
-			pssh.Write(message) //_
-		}
-	})
+	b.Run("string188", func(b *testing.B) { NLongString(188, b) })
 
 }

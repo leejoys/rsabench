@@ -18,15 +18,19 @@ func Benchmark_RSA2048(b *testing.B) { RSANkeyLong(2048, b) }
 
 func Benchmark_RSA4096(b *testing.B) { RSANkeyLong(4096, b) }
 
-func RSANkeyLong(n int, b *testing.B) {
+func Benchmark_ECIES256(b *testing.B) { ECIESCurveN(elliptic.P256(), b) }
 
-	senderPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+func Benchmark_ECIES521(b *testing.B) { ECIESCurveN(elliptic.P521(), b) }
+
+func RSANkeyLong(key int, b *testing.B) {
+
+	senderPrivateKey, err := rsa.GenerateKey(rand.Reader, key)
 	if err != nil {
 		b.Fatal(err)
 	}
 	senderPublicKey := &senderPrivateKey.PublicKey
 
-	receiverPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	receiverPrivateKey, err := rsa.GenerateKey(rand.Reader, key)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -80,9 +84,6 @@ func RSANkeyLong(n int, b *testing.B) {
 	b.Run("string188", func(b *testing.B) { NLongString(188, b) })
 
 }
-
-func Benchmark_ECIES256(b *testing.B) { ECIESCurveN(elliptic.P256(), b) }
-func Benchmark_ECIES521(b *testing.B) { ECIESCurveN(elliptic.P521(), b) }
 
 func ECIESCurveN(ell elliptic.Curve, b *testing.B) {
 	prk, err := getKey(ell)

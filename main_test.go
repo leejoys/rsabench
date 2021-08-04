@@ -216,6 +216,14 @@ func Benchmark_Secp256k1_188(b *testing.B) {
 	ECIES(secp256k1.S256(), []byte(generateString(188)), b)
 }
 
+func Benchmark_Secp256k1Encrypt(b *testing.B) {
+	ECIESEncrypt(secp256k1.S256(), []byte(generateString(188)), b)
+}
+
+func Benchmark_Secp256k1Decrypt(b *testing.B) {
+	ECIESDecrypt(secp256k1.S256(), []byte(generateString(188)), b)
+}
+
 func Benchmark_ECIES256_47(b *testing.B) {
 	ECIES(elliptic.P256(), []byte(generateString(47)), b)
 }

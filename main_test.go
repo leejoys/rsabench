@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/crypto/ecies"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"golang.org/x/crypto/openpgp/elgamal"
 )
 
@@ -203,6 +204,18 @@ func RSADecrypt(key int, message []byte, b *testing.B) {
 	}
 }
 
+func Benchmark_Secp256k1_47(b *testing.B) {
+	ECIES(secp256k1.S256(), []byte(generateString(47)), b)
+}
+
+func Benchmark_Secp256k1_94(b *testing.B) {
+	ECIES(secp256k1.S256(), []byte(generateString(94)), b)
+}
+
+func Benchmark_Secp256k1_188(b *testing.B) {
+	ECIES(secp256k1.S256(), []byte(generateString(188)), b)
+}
+
 func Benchmark_ECIES256_47(b *testing.B) {
 	ECIES(elliptic.P256(), []byte(generateString(47)), b)
 }
@@ -215,33 +228,30 @@ func Benchmark_ECIES256_188(b *testing.B) {
 	ECIES(elliptic.P256(), []byte(generateString(188)), b)
 }
 
-func Benchmark_ECIES521_47(b *testing.B) {
-	ECIES(elliptic.P521(), []byte(generateString(47)), b)
-}
-
-func Benchmark_ECIES521_94(b *testing.B) {
-	ECIES(elliptic.P521(), []byte(generateString(94)), b)
-}
-
-func Benchmark_ECIES521_188(b *testing.B) {
-	ECIES(elliptic.P521(), []byte(generateString(188)), b)
-}
-
 func Benchmark_ECIES256Encrypt(b *testing.B) {
 	ECIESEncrypt(elliptic.P256(), []byte(generateString(188)), b)
-}
-
-func Benchmark_ECIES521Encrypt(b *testing.B) {
-	ECIESEncrypt(elliptic.P521(), []byte(generateString(188)), b)
 }
 
 func Benchmark_ECIES256Decrypt(b *testing.B) {
 	ECIESDecrypt(elliptic.P256(), []byte(generateString(188)), b)
 }
 
-func Benchmark_ECIES521Decrypt(b *testing.B) {
-	ECIESDecrypt(elliptic.P521(), []byte(generateString(188)), b)
-}
+// не работает из-за багов
+// func Benchmark_ECIES521_47(b *testing.B) {
+// 	ECIES(elliptic.P521(), []byte(generateString(47)), b)
+// }
+// func Benchmark_ECIES521_94(b *testing.B) {
+// 	ECIES(elliptic.P521(), []byte(generateString(94)), b)
+// }
+// func Benchmark_ECIES521_188(b *testing.B) {
+// 	ECIES(elliptic.P521(), []byte(generateString(188)), b)
+// }
+// func Benchmark_ECIES521Encrypt(b *testing.B) {
+// 	ECIESEncrypt(elliptic.P521(), []byte(generateString(188)), b)
+// }
+// func Benchmark_ECIES521Decrypt(b *testing.B) {
+// 	ECIESDecrypt(elliptic.P521(), []byte(generateString(188)), b)
+// }
 
 func ECIES(ell elliptic.Curve, message []byte, b *testing.B) {
 	b.StopTimer()

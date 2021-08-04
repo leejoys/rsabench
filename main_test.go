@@ -335,45 +335,45 @@ func Benchmark_Elgamal512_47(b *testing.B) {
 	Elgamal("512", []byte(generateString(25)), b)
 }
 
-func Benchmark_Elgamal512_94(b *testing.B) {
+func Benchmark_Elgamal512_53(b *testing.B) {
 	Elgamal("512", []byte(generateString(53)), b) //53 максимум для ключа в 512
 }
 
 func Benchmark_Elgamal768_53(b *testing.B) {
-	Elgamal("768", []byte(generateString(53)), b) //85 максимум для ключа в 768
+	Elgamal("768", []byte(generateString(53)), b)
 }
 
 func Benchmark_Elgamal768_85(b *testing.B) {
 	Elgamal("768", []byte(generateString(85)), b) //85 максимум для ключа в 768
 }
 
-func Benchmark_Elgamal1024_47(b *testing.B) {
-	Elgamal("1024", []byte(generateString(47)), b)
+func Benchmark_Elgamal1024_25(b *testing.B) {
+	Elgamal("1024", []byte(generateString(25)), b)
 }
 
-func Benchmark_Elgamal1024_94(b *testing.B) {
-	Elgamal("1024", []byte(generateString(94)), b)
+func Benchmark_Elgamal1024_53(b *testing.B) {
+	Elgamal("1024", []byte(generateString(53)), b)
 }
 
-func Benchmark_Elgamal1024_188(b *testing.B) {
-	Elgamal("1024", []byte(generateString(188)), b)
+func Benchmark_Elgamal1024_117(b *testing.B) {
+	Elgamal("1024", []byte(generateString(117)), b) //117 максимум для ключа в 768
 }
 
-// func Benchmark_Elgamal512Encrypt(b *testing.B) {
-// 	ElgamalEncrypt(2048, []byte(generateString(188)), b)
-// }
+func Benchmark_Elgamal512Encrypt(b *testing.B) {
+	ElgamalEncrypt("512", []byte(generateString(53)), b)
+}
 
-// func Benchmark_Elgamal4096Encrypt(b *testing.B) {
-// 	ElgamalEncrypt("1024", []byte(generateString(188)), b)
-// }
+func Benchmark_Elgamal1024Encrypt(b *testing.B) {
+	ElgamalEncrypt("1024", []byte(generateString(117)), b)
+}
 
-// func Benchmark_Elgamal512Decrypt(b *testing.B) {
-// 	ElgamalDecrypt(2048, []byte(generateString(188)), b)
-// }
+func Benchmark_Elgamal512Decrypt(b *testing.B) {
+	ElgamalDecrypt("512", []byte(generateString(53)), b)
+}
 
-// func Benchmark_Elgamal4096Decrypt(b *testing.B) {
-// 	ElgamalDecrypt("1024", []byte(generateString(188)), b)
-// }
+func Benchmark_Elgamal1024Decrypt(b *testing.B) {
+	ElgamalDecrypt("1024", []byte(generateString(117)), b)
+}
 
 func Elgamal(size string, message []byte, b *testing.B) {
 	b.StopTimer()
@@ -405,6 +405,85 @@ func Elgamal(size string, message []byte, b *testing.B) {
 			b.Logf("max len %d-11=%d", pLen, pLen-11)
 			b.Fatal(err)
 		}
+		resultBytesOfMessage, err := elgamal.Decrypt(priv, c1, c2)
+		if err != nil {
+			b.Fatal(err)
+		}
+		b.StopTimer()
+		result = resultBytesOfMessage
+	}
+}
+
+func ElgamalEncrypt(size string, message []byte, b *testing.B) {
+	b.StopTimer()
+
+	x := "40"
+	xval, _ := new(big.Int).SetString(x, 10)
+	g, p, ok := get_g_p(size)
+	if !ok {
+		b.Fatal("SetString not ok")
+	}
+
+	priv := &elgamal.PrivateKey{
+		PublicKey: elgamal.PublicKey{
+			G: g,
+			P: p,
+		},
+		X: xval,
+	}
+	priv.Y = new(big.Int).Exp(priv.G, priv.X, priv.P)
+	pub := &priv.PublicKey
+
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		b.StartTimer()
+
+		c1, c2, err := elgamal.Encrypt(rand.Reader, pub, message)
+		if err != nil {
+			pLen := (pub.P.BitLen() + 7) / 8
+			b.Logf("max len %d-11=%d", pLen, pLen-11)
+			b.Fatal(err)
+		}
+		b.StopTimer()
+		resultBytesOfMessage, err := elgamal.Decrypt(priv, c1, c2)
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		result = resultBytesOfMessage
+	}
+}
+
+func ElgamalDecrypt(size string, message []byte, b *testing.B) {
+	b.StopTimer()
+
+	x := "40"
+	xval, _ := new(big.Int).SetString(x, 10)
+	g, p, ok := get_g_p(size)
+	if !ok {
+		b.Fatal("SetString not ok")
+	}
+
+	priv := &elgamal.PrivateKey{
+		PublicKey: elgamal.PublicKey{
+			G: g,
+			P: p,
+		},
+		X: xval,
+	}
+	priv.Y = new(big.Int).Exp(priv.G, priv.X, priv.P)
+	pub := &priv.PublicKey
+
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+
+		c1, c2, err := elgamal.Encrypt(rand.Reader, pub, message)
+		if err != nil {
+			pLen := (pub.P.BitLen() + 7) / 8
+			b.Logf("max len %d-11=%d", pLen, pLen-11)
+			b.Fatal(err)
+		}
+		b.StartTimer()
 		resultBytesOfMessage, err := elgamal.Decrypt(priv, c1, c2)
 		if err != nil {
 			b.Fatal(err)

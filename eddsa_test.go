@@ -2,14 +2,13 @@ package cryptoBench
 
 import (
 	"crypto/rand"
-	"fmt"
 	"io"
+	"testing"
 
 	"github.com/cloudflare/circl/sign/ed25519"
 )
 
-func ED25519Main() {
-
+func TestED25519Main(t *testing.T) {
 	var public ed25519.PubKey
 	var private ed25519.PrivKey
 
@@ -23,13 +22,15 @@ func ED25519Main() {
 
 	p.KeyGen(&public, &private)
 
-	fmt.Printf("Private:\t%x\n", private)
-	fmt.Printf("Public:\t\t%x\n", public)
+	t.Logf("Private:\t%x\n", private)
+	t.Logf("Public:\t\t%x\n", public)
 
 	sig := p.Sign(msg, &public, &private)
-	fmt.Printf("\n\nSignature:\t%x\n", *sig)
+	t.Logf("\n\nSignature:\t%x\n", *sig)
+	t.Logf("msg:\t%x\n", msg)
+	t.Logf("message:\t%s\n", string(message))
 
 	ver := p.Verify(msg, &public, sig)
-	fmt.Printf("\n\nSignature verified:\t%t\n", ver)
+	t.Logf("\n\nSignature verified:\t%t\n", ver)
 
 }
